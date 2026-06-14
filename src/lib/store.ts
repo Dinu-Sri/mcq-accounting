@@ -18,7 +18,7 @@ interface QuizState {
 
   // Actions
   setYear: (year: string) => void;
-  startQuiz: (totalQuestions: number, timeMinutes: number) => void;
+  startQuiz: (questionIds: number[], timeMinutes: number) => void;
   answerQuestion: (questionId: number, selectedIndex: number) => void;
   nextQuestion: () => void;
   prevQuestion: () => void;
@@ -38,12 +38,12 @@ export const useQuizStore = create<QuizState>((set) => ({
 
   setYear: (year) => set({ selectedYear: year, phase: "selecting" }),
 
-  startQuiz: (totalQuestions, timeMinutes) =>
+  startQuiz: (questionIds, timeMinutes) =>
     set({
       phase: "in-progress",
       timeRemaining: timeMinutes * 60,
-      answers: Array.from({ length: totalQuestions }, (_, i) => ({
-        questionId: i + 1,
+      answers: questionIds.map((id: number) => ({
+        questionId: id,
         selectedIndex: null,
       })),
       currentQuestionIndex: 0,

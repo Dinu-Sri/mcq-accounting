@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useQuizStore } from "@/lib/store";
 import { availablePapers, type PaperInfo } from "@/lib/papers";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -9,12 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, FileText, ArrowRight } from "lucide-react";
 
 export function PaperSelector() {
-  const { setYear, startQuiz, resetQuiz } = useQuizStore();
+  const { setYear, resetQuiz } = useQuizStore();
 
   const handleSelectPaper = (paper: PaperInfo) => {
     resetQuiz();
     setYear(paper.year);
-    startQuiz(paper.totalQuestions, paper.timeMinutes);
   };
 
   return (

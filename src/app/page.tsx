@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import type { MCQ } from "@/lib/questions";
 
 export default function HomePage() {
-  const { phase, selectedYear } = useQuizStore();
+  const { phase, selectedYear, startQuiz } = useQuizStore();
   const [questions, setQuestions] = useState<MCQ[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +16,12 @@ export default function HomePage() {
     if (phase !== "idle" && selectedYear) {
       setLoading(true);
       getQuestions(selectedYear)
-        .then(setQuestions)
+        .then((q) => {
+          setQuestions(q);
+          if (q.length > 0) {
+            startQuiz(q.map((item) => item.id), 60);
+          }
+        })
         .catch(() => setQuestions([]))
         .finally(() => setLoading(false));
     }
