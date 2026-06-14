@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useQuizStore } from "@/lib/store";
 import { formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Timer, ArrowLeft, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+import { Timer, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, X } from "lucide-react";
 
 interface QuizRunnerProps {
   questions: Array<{
@@ -32,6 +32,10 @@ export function QuizRunner({ questions }: QuizRunnerProps) {
     tick,
   } = useQuizStore();
 
+  // Custom confirm dialog state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [unansweredCount, setUnansweredCount] = useState(0);
+
   // Timer countdown
   useEffect(() => {
     if (phase !== "in-progress") return;
@@ -47,7 +51,8 @@ export function QuizRunner({ questions }: QuizRunnerProps) {
   const handleAnswerSelect = useCallback(
     (optionIndex: number) => {
       if (phase !== "in-progress") return;
-      answerQuestion(currentQuestion.questionId, optionIndex);
+      if (!currentQuestion) return;
+      answerQuestion(currentQuestion.id, optionIndex);
     },
     [phase, currentQuestion, answerQuestion]
   );
@@ -56,13 +61,17 @@ export function QuizRunner({ questions }: QuizRunnerProps) {
     if (phase !== "in-progress") return;
     const unanswered = answers.filter((a) => a.selectedIndex === null).length;
     if (unanswered > 0) {
-      const confirmed = window.confirm(
-        `You have ${unanswered} unanswered question(s). Are you sure you want to finish?`
-      );
-      if (!confirmed) return;
+      setUnansweredCount(unanswered);
+      setConfirmOpen(true);
+      return;
     }
     finishQuiz();
   }, [phase, answers, finishQuiz]);
+
+  const handleConfirmFinish = useCallback(() => {
+    setConfirmOpen(false);
+    finishQuiz();
+  }, [finishQuiz]);
 
   if (phase === "finished") {
     return <QuizResult questions={questions} onReview={startReview} />;
@@ -172,6 +181,38 @@ export function QuizRunner({ questions }: QuizRunnerProps) {
           Next <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* Custom Confirm Finish Dialog */}
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirmOpen(false)} />
+          <div className="relative z-10 w-full max-w-md rounded-xl border bg-card p-6 shadow-lg mx-4">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Finish Quiz?</h3>
+              </div>
+              <button onClick={() => setConfirmOpen(false)} className="rounded-lg p-1.5 hover:bg-muted transition-colors">
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              You have <span className="font-semibold text-foreground">{unansweredCount} unanswered question{unansweredCount > 1 ? "s" : ""}</span>.
+              {" "}Are you sure you want to finish the quiz?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+                Continue Quiz
+              </Button>
+              <Button variant="default" onClick={handleConfirmFinish}>
+                Finish Now
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
