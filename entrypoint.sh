@@ -10,6 +10,16 @@ echo "Applying database schema..."
 npx prisma db push --skip-generate
 
 echo "Seeding MCQ questions..."
+node -e "
+const { PrismaClient } = require('@prisma/client');
+const p = new PrismaClient();
+p.question.count().then(c => {
+  if (c > 35) {
+    console.log('Cleaning up ' + c + ' duplicate questions...');
+    return p.question.deleteMany().then(() => console.log('Cleaned. Re-seeding...'));
+  }
+}).finally(() => p.\$disconnect());
+"
 npx prisma db seed
 
 echo "Starting SL Accounting MCQ..."

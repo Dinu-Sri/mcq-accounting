@@ -427,6 +427,12 @@ const sampleQuestions = {
 async function main() {
   console.log("Seeding MCQ questions...");
 
+  const existingCount = await prisma.question.count();
+  if (existingCount > 0) {
+    console.log("Database already has " + existingCount + " questions. Skipping seed.");
+    return;
+  }
+
   for (const [year, questions] of Object.entries(sampleQuestions)) {
     for (const q of questions) {
       await prisma.question.create({
