@@ -1,3 +1,5 @@
+"use server";
+
 // MCQ data store - questions and answers for each year
 export interface MCQ {
   id: number;
@@ -7,11 +9,9 @@ export interface MCQ {
   explanation?: string;
 }
 
-// In production this would come from a database
-// For now we seed sample questions per year
+import { db } from "./db";
+
 export async function getQuestions(year: string): Promise<MCQ[]> {
-  // Placeholder - real data will be loaded from DB or JSON files
-  const { db } = await import("./db");
   const questions = await db.question.findMany({
     where: { year },
     orderBy: { id: "asc" },
