@@ -6,8 +6,8 @@ if [ -n "${DB_PASSWORD:-}" ]; then
   export DATABASE_URL="postgresql://mcquser:${ENCODED_DB_PASSWORD}@postgres:5432/mcqdb?schema=public"
 fi
 
-echo "Applying database migrations..."
-npx prisma migrate deploy
+echo "Applying database schema..."
+npx prisma db push --skip-generate
 
 echo "Seeding MCQ questions..."
 npx prisma db seed
