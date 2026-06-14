@@ -27,7 +27,7 @@ services:
     volumes:
       - mcq_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mcquser"]
+      test: ["CMD-SHELL", "pg_isready -U mcquser -d mcqdb"]
       interval: 5s
       timeout: 5s
       retries: 5
