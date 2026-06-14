@@ -9,5 +9,8 @@ fi
 echo "Applying database migrations..."
 npx prisma migrate deploy
 
+echo "Seeding MCQ questions..."
+npx prisma db seed
+
 echo "Starting SL Accounting MCQ..."
 exec node server.js
