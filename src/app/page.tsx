@@ -4,16 +4,18 @@ import { useQuizStore } from "@/lib/store";
 import { PaperSelector } from "@/components/quiz/paper-selector";
 import { QuizRunner } from "@/components/quiz/quiz-runner";
 import { getQuestions } from "@/lib/questions";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MCQ } from "@/lib/questions";
 
 export default function HomePage() {
   const { phase, selectedYear, startQuiz } = useQuizStore();
   const [questions, setQuestions] = useState<MCQ[]>([]);
   const [loading, setLoading] = useState(false);
+  const startedRef = useRef(false);
 
   useEffect(() => {
-    if (phase !== "idle" && selectedYear) {
+    if (phase !== "idle" && selectedYear && !startedRef.current) {
+      startedRef.current = true;
       setLoading(true);
       getQuestions(selectedYear)
         .then((q) => {
@@ -25,7 +27,11 @@ export default function HomePage() {
         .catch(() => setQuestions([]))
         .finally(() => setLoading(false));
     }
-  }, [phase, selectedYear]);
+    if (phase === "idle") {
+      startedRef.current = false;
+      setQuestions([]);
+    }
+  }, [phase, selectedYear, startQuiz]);
 
   if (phase === "idle") {
     return <PaperSelector />;
